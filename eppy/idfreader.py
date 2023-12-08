@@ -38,19 +38,28 @@ def iddversiontuple(afile):
         return tuple([int(num) for num in vers.split(".")])
 
     try:
+        # Attempt to open the file if 'afile' is a path
         fhandle = open(afile, "rb")
     except TypeError:
+        # 'afile' is not a path but an already open file handle
         fhandle = afile
-    line1 = fhandle.readline()
+
     try:
-        line1 = line1.decode("ISO-8859-2")
-    except AttributeError:
-        pass
-    line = line1.strip()
-    if line1 == "":
-        return (0,)
-    vers = line.split()[-1]
-    return versiontuple(vers)
+        line1 = fhandle.readline()
+        try:
+            line1 = line1.decode("ISO-8859-2")
+        except AttributeError:
+            pass
+        line = line1.strip()
+        if line1 == "":
+            return (0,)
+        vers = line.split()[-1]
+        return versiontuple(vers)
+    finally:
+        # If we opened the file in this function, close it
+        if 'fhandle' in locals() and fhandle is not afile:
+            fhandle.close()
+
 
 
 def makeabunch(commdct, obj, obj_i, debugidd=True, block=None):
